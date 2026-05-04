@@ -87,7 +87,7 @@ jobs:
         run: npm ci
 
       - name: Install Tauri CLI
-        run: cargo install tauri-cli --version "^1.5" --locked
+        run: cargo install tauri-cli --version "1.6.6" --locked
 
       - name: Tauri build check
         working-directory: crates/cicada-client

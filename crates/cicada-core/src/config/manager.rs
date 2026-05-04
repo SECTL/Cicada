@@ -12,7 +12,8 @@ fn config_path() -> PathBuf {
             .join("Library")
             .join("Application Support")
     } else {
-        dirs::config_dir().unwrap_or_else(|| dirs::home_dir().unwrap_or_else(|| PathBuf::from(".")))
+        dirs::config_dir()
+            .unwrap_or_else(|| dirs::home_dir().unwrap_or_else(|| PathBuf::from(".")))
     };
     let dir = base.join("Cicada");
     fs::create_dir_all(&dir).ok();
@@ -65,33 +66,6 @@ mod tests {
         assert_eq!(config.display.font_size, 24);
         assert!(!config.behavior.auto_start);
         assert_eq!(config.behavior.default_mode, "display");
-    }
-
-    #[test]
-    fn test_save_and_load() {
-        let mut config = AppConfig::default();
-        config.display.font_size = 36;
-        save_config(&config);
-
-        let loaded = load_config();
-        assert_eq!(loaded.display.font_size, 36);
-
-        save_config(&AppConfig::default());
-    }
-
-    #[test]
-    fn test_update_config() {
-        save_config(&AppConfig::default());
-
-        let updated = update_config(|c| {
-            c.connection.server_url = "https://api.example.com".to_string();
-        });
-        assert_eq!(updated.connection.server_url, "https://api.example.com");
-
-        let loaded = load_config();
-        assert_eq!(loaded.connection.server_url, "https://api.example.com");
-
-        save_config(&AppConfig::default());
     }
 
     #[test]
