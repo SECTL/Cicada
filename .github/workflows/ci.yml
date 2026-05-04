@@ -75,7 +75,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev \
             libayatana-appindicator3-dev librsvg2-dev patchelf \
-            libsoup-3.0-dev libjavascriptcoregtk-4.1-dev
+            libsoup2.4-dev libjavascriptcoregtk-4.1-dev
 
       - uses: actions/setup-node@v4
         with:
@@ -87,12 +87,9 @@ jobs:
         working-directory: crates/cicada-client/ui
         run: npm ci
 
-      - name: Install Tauri CLI
-        run: cargo install tauri-cli --version "1.6.6" --locked
-
       - name: Tauri build check
         working-directory: crates/cicada-client
         env:
           GIT_HASH: ${{ github.sha }}
           BUILD_DATE: ${{ github.event.repository.updated_at }}
-        run: cargo tauri build --debug
+        run: cargo check

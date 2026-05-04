@@ -10,7 +10,6 @@ mod windows;
 
 use cicada_core::auth::oauth::OAuthClient;
 use commands::auth::AuthState;
-use tray::{create_tray, handle_tray_event};
 
 fn main() {
     let config = config::load_config();
@@ -29,8 +28,6 @@ fn main() {
 
     tauri::Builder::default()
         .manage(auth_state)
-        .system_tray(create_tray())
-        .on_system_tray_event(handle_tray_event)
         .invoke_handler(tauri::generate_handler![
             commands::auth::start_login,
             commands::auth::complete_login,

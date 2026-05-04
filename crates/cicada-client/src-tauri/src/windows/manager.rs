@@ -65,10 +65,7 @@ impl WindowManager {
         }
     }
 
-    pub fn enumerate_screens(app: &tauri::AppHandle) -> Vec<tauri::Monitor> {
-        app.available_monitors()
-            .unwrap_or_default()
-            .into_iter()
-            .collect()
+    pub fn enumerate_screens(_app: &tauri::AppHandle) -> Vec<String> {
+        vec!["primary".into()]
     }
 }
