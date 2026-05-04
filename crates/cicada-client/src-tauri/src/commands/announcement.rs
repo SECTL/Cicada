@@ -1,26 +1,12 @@
 use cicada_core::types::announcement::Announcement;
-use std::sync::Mutex;
-use tauri::State;
-
-pub struct AnnouncementState {
-    pub announcements: Mutex<Vec<Announcement>>,
-}
 
 #[tauri::command]
-pub async fn publish_announcement(
-    _title: String,
-    _content_html: String,
-    _announcement_type: String,
-    _publisher_name: String,
-    _state: State<'_, AnnouncementState>,
+pub fn publish_announcement(
+    title: String,
+    content_html: String,
+    announcement_type: String,
+    publisher_name: String,
 ) -> Result<(), String> {
+    let _ = (title, content_html, announcement_type, publisher_name);
     Ok(())
-}
-
-#[tauri::command]
-pub async fn get_announcements(
-    _state: State<'_, AnnouncementState>,
-) -> Result<Vec<Announcement>, String> {
-    let guard = _state.announcements.lock().unwrap();
-    Ok(guard.clone())
 }

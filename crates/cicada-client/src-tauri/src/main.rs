@@ -9,9 +9,8 @@ mod updater;
 mod windows;
 
 use cicada_core::auth::oauth::OAuthClient;
-use commands::announcement::AnnouncementState;
 use commands::auth::AuthState;
-use tray::create_tray;
+use tray::{create_tray, handle_tray_event};
 
 fn main() {
     let config = config::load_config();
@@ -28,13 +27,10 @@ fn main() {
         user_info: std::sync::Mutex::new(None),
     };
 
-    let announcement_state = AnnouncementState {
-        announcements: std::sync::Mutex::new(Vec::new()),
-    };
-
     tauri::Builder::default()
         .manage(auth_state)
-        .manage(announcement_state)
+        .system_tray(create_tray())
+        .on_system_tray_event(handle_tray_event)
         .invoke_handler(tauri::generate_handler![
             commands::auth::start_login,
             commands::auth::complete_login,
@@ -48,16 +44,9 @@ fn main() {
             commands::mode::set_mode,
             commands::mode::get_mode,
             commands::build_info::get_build_info,
-            commands::announcement::publish_announcement,
-            commands::announcement::get_announcements,
         ])
         .setup(|app| {
-            let window = app
-                .get_webview_window("main")
-                .expect("main window not found");
-            let _ = window.show();
-            let _ = window.set_focus();
-            create_tray(app.handle())?;
+            let _window = app.get_window("main").expect("main window not found");
             Ok(())
         })
         .run(tauri::generate_context!())
