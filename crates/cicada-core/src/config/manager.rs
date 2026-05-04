@@ -12,8 +12,7 @@ fn config_path() -> PathBuf {
             .join("Library")
             .join("Application Support")
     } else {
-        dirs::config_dir()
-            .unwrap_or_else(|| dirs::home_dir().unwrap_or_else(|| PathBuf::from(".")))
+        dirs::config_dir().unwrap_or_else(|| dirs::home_dir().unwrap_or_else(|| PathBuf::from(".")))
     };
     let dir = base.join("Cicada");
     fs::create_dir_all(&dir).ok();
