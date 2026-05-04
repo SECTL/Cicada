@@ -1,5 +1,3 @@
-use cicada_core::types::announcement::Announcement;
-
 #[tauri::command]
 pub fn publish_announcement(
     title: String,

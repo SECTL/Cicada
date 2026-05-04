@@ -83,9 +83,9 @@ jobs:
           cache: npm
           cache-dependency-path: crates/cicada-client/ui/package-lock.json
 
-      - name: Install frontend deps
+      - name: Build frontend
         working-directory: crates/cicada-client/ui
-        run: npm ci
+        run: npm run build
 
       - name: Tauri build check
         working-directory: crates/cicada-client

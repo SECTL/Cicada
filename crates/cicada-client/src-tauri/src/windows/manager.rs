@@ -1,4 +1,4 @@
-use tauri::{Manager, Window, WindowBuilder};
+use tauri::{Manager, WindowBuilder};
 
 pub struct WindowManager {
     floating_windows: Vec<String>,
