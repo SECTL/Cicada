@@ -66,6 +66,12 @@ impl MemoryStorage {
     }
 }
 
+impl Default for MemoryStorage {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl TokenStorage for MemoryStorage {
     fn save_tokens(&self, tokens: &AuthToken) -> Result<(), AuthError> {
         let mut guard = self.tokens.lock().unwrap();

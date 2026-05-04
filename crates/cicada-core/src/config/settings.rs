@@ -69,19 +69,12 @@ impl Default for ConnectionSettings {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, PartialEq)]
+#[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Default)]
 pub struct AppConfig {
+    #[serde(default)]
     pub connection: ConnectionSettings,
+    #[serde(default)]
     pub display: DisplaySettings,
+    #[serde(default)]
     pub behavior: BehaviorSettings,
-}
-
-impl Default for AppConfig {
-    fn default() -> Self {
-        Self {
-            connection: ConnectionSettings::default(),
-            display: DisplaySettings::default(),
-            behavior: BehaviorSettings::default(),
-        }
-    }
 }
