@@ -1,6 +1,4 @@
-use tauri::{
-    AppHandle, CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu,
-};
+use tauri::{AppHandle, CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu};
 
 pub fn create_tray() -> SystemTray {
     let show = CustomMenuItem::new("show".to_string(), "显示浮窗");
