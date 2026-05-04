@@ -1,0 +1,23 @@
+[package]
+name = "cicada-client"
+version = "0.1.0"
+edition = "2021"
+license = "GPLv3.0"
+authors = ["SECTL"]
+
+[build-dependencies]
+tauri-build = { version = "2", features = [] }
+
+[dependencies]
+cicada-core = { path = "../../cicada-core" }
+cicada-api = { path = "../../cicada-api" }
+serde_json.workspace = true
+serde.workspace = true
+tauri = { version = "2", features = ["tray-icon"] }
+tokio.workspace = true
+uuid.workspace = true
+dirs = "6"
+
+[features]
+default = ["custom-protocol"]
+custom-protocol = ["tauri/custom-protocol"]

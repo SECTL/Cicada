@@ -1,0 +1,36 @@
+[package]
+name = "cicada-core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+chrono.workspace = true
+uuid.workspace = true
+thiserror.workspace = true
+tokio.workspace = true
+reqwest.workspace = true
+tracing.workspace = true
+
+# PKCE support
+sha2 = "0.10"
+rand = "0.8"
+base64 = "0.22"
+
+# TOML config
+toml = "0.8"
+dirs = "5"
+
+# Keyring for secure storage
+keyring = "3"
+
+# WebSocket
+tokio-tungstenite = "0.23"
+futures-util = "0.3"
+
+[dev-dependencies]
+tokio-test = "0.4"
+wiremock = "0.6"

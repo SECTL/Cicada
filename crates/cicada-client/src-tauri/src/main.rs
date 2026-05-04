@@ -1,0 +1,63 @@
+use cicada_core::auth::MemoryStorage;
+use cicada_core::config;
+use tauri::Manager;
+
+mod tray;
+mod windows;
+mod autostart;
+mod updater;
+mod commands;
+
+use commands::auth::AuthState;
+use commands::announcement::AnnouncementState;
+use cicada_core::auth::oauth::OAuthClient;
+use tray::create_tray;
+
+fn main() {
+    let config = config::load_config();
+
+    let oauth_client = OAuthClient::new(
+        config.connection.client_id.clone(),
+        "https://appwrite.sectl.cn".to_string(),
+        "http://localhost:5173/callback".to_string(),
+    );
+
+    let auth_state = AuthState {
+        client: oauth_client,
+        storage: MemoryStorage::new(),
+        user_info: std::sync::Mutex::new(None),
+    };
+
+    let announcement_state = AnnouncementState {
+        announcements: std::sync::Mutex::new(Vec::new()),
+    };
+
+    tauri::Builder::default()
+        .manage(auth_state)
+        .manage(announcement_state)
+        .invoke_handler(tauri::generate_handler![
+            commands::auth::start_login,
+            commands::auth::complete_login,
+            commands::auth::get_user_info,
+            commands::auth::logout,
+            commands::config_cmd::get_config,
+            commands::config_cmd::update_config,
+            commands::config_cmd::reset_config,
+            commands::config_cmd::enable_autostart,
+            commands::config_cmd::disable_autostart,
+            commands::mode::set_mode,
+            commands::mode::get_mode,
+            commands::build_info::get_build_info,
+            commands::announcement::publish_announcement,
+            commands::announcement::get_announcements,
+        ])
+        .setup(|app| {
+            let window = app.get_webview_window("main").expect("main window not found");
+            let _ = window.show();
+            let _ = window.set_focus();
+            create_tray(app.handle())?;
+            Ok(())
+        })
+        .run(tauri::generate_context!())
+        .expect("error while running Cicada");
+}

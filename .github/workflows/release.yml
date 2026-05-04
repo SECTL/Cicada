@@ -1,0 +1,220 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v[0-9]+.[0-9]+.[0-9]+"
+
+permissions:
+  contents: write
+
+jobs:
+  version:
+    name: Extract version
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+  windows:
+    name: Windows (${{ matrix.arch }})
+    runs-on: windows-latest
+    needs: version
+    strategy:
+      fail-fast: false
+      matrix:
+        arch: [x86_64, i686]
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.arch }}-pc-windows-msvc
+
+      - uses: Swatinem/rust-cache@v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install frontend deps
+        working-directory: crates/cicada-client/ui
+        run: npm ci
+
+      - name: Build
+        working-directory: crates/cicada-client
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          GIT_HASH: ${{ github.sha }}
+          BUILD_DATE: ${{ github.event.repository.updated_at }}
+        run: cargo tauri build --target ${{ matrix.arch }}-pc-windows-msvc
+
+      - name: Rename artifacts
+        shell: pwsh
+        run: |
+          $src = "crates/cicada-client/src-tauri/target/${{ matrix.arch }}-pc-windows-msvc/release/bundle"
+          Get-ChildItem "$src/msi" -Filter *.msi | Rename-Item -NewName "Cicada_$env:VERSION_windows_${{ matrix.arch }}.msi"
+          $exe = Get-ChildItem "$src/nsis" -Filter *.exe | Select-Object -First 1
+          if ($exe) { Rename-Item $exe.FullName -NewName "Cicada_$env:VERSION_windows_${{ matrix.arch }}.exe" }
+
+      - name: Make zip (portable)
+        shell: pwsh
+        run: |
+          $bundle = "crates/cicada-client/src-tauri/target/${{ matrix.arch }}-pc-windows-msvc/release/bundle"
+          $exe = Get-ChildItem "$bundle/nsis" -Filter *.exe | Select-Object -First 1
+          if ($exe) {
+            Compress-Archive -Path $exe.FullName -DestinationPath "Cicada_$env:VERSION_windows_${{ matrix.arch }}_portable.zip"
+          }
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-${{ matrix.arch }}
+          path: |
+            crates/cicada-client/src-tauri/target/${{ matrix.arch }}-pc-windows-msvc/release/bundle/msi/*.msi
+            crates/cicada-client/src-tauri/target/${{ matrix.arch }}-pc-windows-msvc/release/bundle/nsis/*.exe
+            Cicada_*_windows_${{ matrix.arch }}_portable.zip
+
+  linux:
+    name: Linux
+    runs-on: ubuntu-latest
+    needs: version
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install system deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y libwebkit2gtk-4.1-dev libgtk-3-dev \
+            libayatana-appindicator3-dev librsvg2-dev patchelf
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install frontend deps
+        working-directory: crates/cicada-client/ui
+        run: npm ci
+
+      - name: Build
+        working-directory: crates/cicada-client
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          GIT_HASH: ${{ github.sha }}
+          BUILD_DATE: ${{ github.event.repository.updated_at }}
+        run: cargo tauri build
+
+      - name: Rename artifacts
+        run: |
+          BUNDLE="crates/cicada-client/src-tauri/target/release/bundle"
+          if [ -f "$BUNDLE/deb/"*.deb ]; then
+            mv "$BUNDLE/deb/"*.deb "Cicada_${VERSION}_linux_amd64.deb"
+          fi
+          if [ -f "$BUNDLE/appimage/"*.AppImage ]; then
+            mv "$BUNDLE/appimage/"*.AppImage "Cicada_${VERSION}_linux_amd64.AppImage"
+          fi
+          if [ -f "$BUNDLE/deb/"*.deb ]; then
+            cp "$BUNDLE/deb/"*.deb /tmp/ 2>/dev/null || true
+          fi
+          cd "$BUNDLE/deb" 2>/dev/null && for f in *.deb; do
+            dpkg-deb -x "$f" /tmp/cicada-extract
+            (cd /tmp/cicada-extract && zip -r "$GITHUB_WORKSPACE/Cicada_${VERSION}_linux_amd64_portable.zip" .)
+          done || true
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: linux-amd64
+          path: |
+            Cicada_*_linux_*.deb
+            Cicada_*_linux_*.AppImage
+            Cicada_*_linux_*_portable.zip
+
+  macos:
+    name: macOS
+    runs-on: macos-latest
+    needs: version
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+
+      - uses: Swatinem/rust-cache@v2
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install frontend deps
+        working-directory: crates/cicada-client/ui
+        run: npm ci
+
+      - name: Build (universal)
+        working-directory: crates/cicada-client
+        env:
+          TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
+          TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
+          GIT_HASH: ${{ github.sha }}
+          BUILD_DATE: ${{ github.event.repository.updated_at }}
+        run: cargo tauri build --target universal-apple-darwin
+
+      - name: Rename artifacts
+        run: |
+          BUNDLE="crates/cicada-client/src-tauri/target/universal-apple-darwin/release/bundle"
+          if ls "$BUNDLE/dmg/"*.dmg 1>/dev/null 2>&1; then
+            mv "$BUNDLE/dmg/"*.dmg "Cicada_${VERSION}_macos_universal.dmg"
+          fi
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-universal
+          path: Cicada_*_macos_*.dmg
+
+  github-release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    needs: [version, windows, linux, macos]
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - uses: actions/download-artifact@v4
+
+      - name: Generate changelog
+        run: |
+          PREV_TAG=$(git describe --tags --abbrev=0 HEAD^ 2>/dev/null || echo "")
+          if [ -n "$PREV_TAG" ]; then
+            git log --pretty=format:"- %s (%h)" "$PREV_TAG..HEAD" > CHANGELOG.md
+          else
+            git log --pretty=format:"- %s (%h)" > CHANGELOG.md
+          fi
+
+      - name: Create release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "v${{ needs.version.outputs.version }}"
+          body_path: CHANGELOG.md
+          files: |
+            windows-x86_64/Cicada_*_windows_x86_64.*
+            windows-x86_64/Cicada_*_windows_x86_64_portable.zip
+            windows-i686/Cicada_*_windows_i686.*
+            windows-i686/Cicada_*_windows_i686_portable.zip
+            linux-amd64/Cicada_*_linux_*
+            macos-universal/Cicada_*_macos_*
+          draft: false
+          prerelease: false

@@ -1,0 +1,19 @@
+[package]
+name = "cicada-api"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
+
+[dependencies]
+cicada-core = { path = "../cicada-core" }
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+reqwest.workspace = true
+tokio.workspace = true
+uuid.workspace = true
+
+[dev-dependencies]
+wiremock = "0.6"
+tokio-test = "0.4"
