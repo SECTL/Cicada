@@ -120,7 +120,10 @@ mod tests {
     #[test]
     fn test_platform_detect() {
         let platform = Platform::detect();
-        assert!(matches!(platform, Platform::Windows | Platform::Linux | Platform::MacOS));
+        assert!(matches!(
+            platform,
+            Platform::Windows | Platform::Linux | Platform::MacOS
+        ));
     }
 
     #[test]
@@ -159,7 +162,9 @@ mod tests {
 
     #[test]
     fn test_ws_message_heartbeat() {
-        let msg = WsMessage::Heartbeat { timestamp: 1234567890 };
+        let msg = WsMessage::Heartbeat {
+            timestamp: 1234567890,
+        };
         let json = serde_json::to_string(&msg).unwrap();
         let decoded: WsMessage = serde_json::from_str(&json).unwrap();
         assert!(matches!(decoded, WsMessage::Heartbeat { .. }));

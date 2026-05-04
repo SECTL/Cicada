@@ -2,15 +2,15 @@ use cicada_core::auth::MemoryStorage;
 use cicada_core::config;
 use tauri::Manager;
 
-mod tray;
-mod windows;
 mod autostart;
-mod updater;
 mod commands;
+mod tray;
+mod updater;
+mod windows;
 
-use commands::auth::AuthState;
-use commands::announcement::AnnouncementState;
 use cicada_core::auth::oauth::OAuthClient;
+use commands::announcement::AnnouncementState;
+use commands::auth::AuthState;
 use tray::create_tray;
 
 fn main() {
@@ -52,7 +52,9 @@ fn main() {
             commands::announcement::get_announcements,
         ])
         .setup(|app| {
-            let window = app.get_webview_window("main").expect("main window not found");
+            let window = app
+                .get_webview_window("main")
+                .expect("main window not found");
             let _ = window.show();
             let _ = window.set_focus();
             create_tray(app.handle())?;

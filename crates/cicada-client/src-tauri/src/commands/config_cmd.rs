@@ -1,5 +1,5 @@
-use cicada_core::config::{load_config, save_config, AppConfig};
 use crate::autostart;
+use cicada_core::config::{load_config, save_config, AppConfig};
 
 #[tauri::command]
 pub fn get_config() -> AppConfig {

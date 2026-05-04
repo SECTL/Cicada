@@ -9,9 +9,12 @@ pub fn enable_autostart() -> Result<(), String> {
             .args([
                 "add",
                 r"HKCU\Software\Microsoft\Windows\CurrentVersion\Run",
-                "/v", "Cicada",
-                "/t", "REG_SZ",
-                "/d", &format!(r#""{}" --silent"#, exe_str),
+                "/v",
+                "Cicada",
+                "/t",
+                "REG_SZ",
+                "/d",
+                &format!(r#""{}" --silent"#, exe_str),
                 "/f",
             ])
             .output()
@@ -34,7 +37,8 @@ pub fn enable_autostart() -> Result<(), String> {
             .unwrap_or_else(|| PathBuf::from("."))
             .join("Library/LaunchAgents");
         std::fs::create_dir_all(&launch_dir).ok();
-        std::fs::write(launch_dir.join("com.cicada.app.plist"), plist).map_err(|e| e.to_string())?;
+        std::fs::write(launch_dir.join("com.cicada.app.plist"), plist)
+            .map_err(|e| e.to_string())?;
     } else {
         let desktop = format!(
             "[Desktop Entry]\nType=Application\nName=Cicada\nExec=\"{}\" --silent\nX-GNOME-Autostart-enabled=true\n",
@@ -55,7 +59,9 @@ pub fn disable_autostart() -> Result<(), String> {
             .args([
                 "delete",
                 r"HKCU\Software\Microsoft\Windows\CurrentVersion\Run",
-                "/v", "Cicada", "/f",
+                "/v",
+                "Cicada",
+                "/f",
             ])
             .output()
             .map_err(|e| e.to_string())?;
@@ -80,7 +86,12 @@ pub fn disable_autostart() -> Result<(), String> {
 pub fn is_autostart_enabled() -> bool {
     if cfg!(target_os = "windows") {
         if let Ok(output) = std::process::Command::new("reg")
-            .args(["query", r"HKCU\Software\Microsoft\Windows\CurrentVersion\Run", "/v", "Cicada"])
+            .args([
+                "query",
+                r"HKCU\Software\Microsoft\Windows\CurrentVersion\Run",
+                "/v",
+                "Cicada",
+            ])
             .output()
         {
             return output.status.success();

@@ -8,11 +8,14 @@ fn main() {
     // 尝试嵌入应用程序清单
     #[cfg(windows)]
     {
-        let manifest_path = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR"))
-            .join("cicada-client.manifest");
+        let manifest_path =
+            std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("cicada-client.manifest");
         if manifest_path.exists() {
             println!("cargo:rustc-link-arg=/MANIFEST:EMBED");
-            println!("cargo:rustc-link-arg=/MANIFESTINPUT:{}", manifest_path.display());
+            println!(
+                "cargo:rustc-link-arg=/MANIFESTINPUT:{}",
+                manifest_path.display()
+            );
         }
     }
 }

@@ -1,6 +1,6 @@
 use cicada_core::auth::{
-    generate_code_challenge, generate_code_verifier,
-    oauth::OAuthClient, MemoryStorage, TokenStorage,
+    generate_code_challenge, generate_code_verifier, oauth::OAuthClient, MemoryStorage,
+    TokenStorage,
 };
 
 #[test]

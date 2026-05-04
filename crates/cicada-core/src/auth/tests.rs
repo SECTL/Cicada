@@ -16,7 +16,10 @@ mod tests {
         assert!(!challenge.is_empty(), "challenge should not be empty");
 
         let challenge2 = generate_code_challenge(&verifier);
-        assert_eq!(challenge, challenge2, "same verifier should produce same challenge");
+        assert_eq!(
+            challenge, challenge2,
+            "same verifier should produce same challenge"
+        );
     }
 
     #[test]
@@ -39,11 +42,7 @@ mod tests {
     #[tokio::test]
     async fn test_token_exchange_success() {
         let mock_server = MockServer::start().await;
-        let client = OAuthClient::new(
-            "pf_test",
-            mock_server.uri(),
-            "http://localhost/callback",
-        );
+        let client = OAuthClient::new("pf_test", mock_server.uri(), "http://localhost/callback");
 
         Mock::given(method("POST"))
             .and(path("/api/oauth/token"))
@@ -85,7 +84,9 @@ mod tests {
             .mount(&mock_server)
             .await;
 
-        let result = client.refresh_access_token("old_refresh", "device-123", "127.0.0.1").await;
+        let result = client
+            .refresh_access_token("old_refresh", "device-123", "127.0.0.1")
+            .await;
         assert!(result.is_ok());
         let token = result.unwrap();
         assert_eq!(token.access_token, "new_access");

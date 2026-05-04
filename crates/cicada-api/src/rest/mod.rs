@@ -91,7 +91,12 @@ impl ApiClient {
 
     pub async fn delete_announcement(&self, id: &str, token: &str) -> Result<(), ApiError> {
         let url = format!("{}/api/v1/announcements/{}", self.base_url, id);
-        let resp = self.http_client.delete(&url).bearer_auth(token).send().await?;
+        let resp = self
+            .http_client
+            .delete(&url)
+            .bearer_auth(token)
+            .send()
+            .await?;
 
         match resp.status().as_u16() {
             204 | 200 => Ok(()),
@@ -101,11 +106,16 @@ impl ApiClient {
         }
     }
 
-    async fn handle_response<T: serde::de::DeserializeOwned>(resp: reqwest::Response) -> Result<T, ApiError> {
+    async fn handle_response<T: serde::de::DeserializeOwned>(
+        resp: reqwest::Response,
+    ) -> Result<T, ApiError> {
         let status = resp.status().as_u16();
         match status {
             200 | 201 => {
-                let body = resp.text().await.map_err(|e| ApiError::ParseError(e.to_string()))?;
+                let body = resp
+                    .text()
+                    .await
+                    .map_err(|e| ApiError::ParseError(e.to_string()))?;
                 serde_json::from_str(&body).map_err(|e| ApiError::ParseError(e.to_string()))
             }
             401 => Err(ApiError::Unauthorized),

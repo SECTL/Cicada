@@ -19,4 +19,3 @@ pub fn get_build_info() -> BuildInfo {
         target: std::env::consts::ARCH.into(),
     }
 }
-

@@ -15,7 +15,11 @@ pub struct OAuthClient {
 }
 
 impl OAuthClient {
-    pub fn new(client_id: impl Into<String>, base_url: impl Into<String>, redirect_uri: impl Into<String>) -> Self {
+    pub fn new(
+        client_id: impl Into<String>,
+        base_url: impl Into<String>,
+        redirect_uri: impl Into<String>,
+    ) -> Self {
         Self {
             client_id: client_id.into(),
             base_url: base_url.into(),
@@ -24,7 +28,12 @@ impl OAuthClient {
         }
     }
 
-    pub fn build_authorize_url(&self, code_challenge: &str, state: &str, scope: Option<&str>) -> String {
+    pub fn build_authorize_url(
+        &self,
+        code_challenge: &str,
+        state: &str,
+        scope: Option<&str>,
+    ) -> String {
         let mut url = format!(
             "{}/oauth/authorize?client_id={}&redirect_uri={}&response_type=code&code_challenge={}&code_challenge_method=S256&state={}",
             self.base_url, self.client_id, self.redirect_uri, code_challenge, state
@@ -58,7 +67,10 @@ impl OAuthClient {
             .await?;
 
         if resp.status().is_success() {
-            let token: AuthToken = resp.json().await.map_err(|e| AuthError::InvalidResponse(e.to_string()))?;
+            let token: AuthToken = resp
+                .json()
+                .await
+                .map_err(|e| AuthError::InvalidResponse(e.to_string()))?;
             Ok(token)
         } else if resp.status().as_u16() == 401 {
             Err(AuthError::Unauthorized)
@@ -89,7 +101,10 @@ impl OAuthClient {
             .await?;
 
         if resp.status().is_success() {
-            let token: AuthToken = resp.json().await.map_err(|e| AuthError::InvalidResponse(e.to_string()))?;
+            let token: AuthToken = resp
+                .json()
+                .await
+                .map_err(|e| AuthError::InvalidResponse(e.to_string()))?;
             Ok(token)
         } else if resp.status().as_u16() == 401 {
             Err(AuthError::Unauthorized)
@@ -107,7 +122,10 @@ impl OAuthClient {
             .await?;
 
         if resp.status().is_success() {
-            let info: UserInfo = resp.json().await.map_err(|e| AuthError::InvalidResponse(e.to_string()))?;
+            let info: UserInfo = resp
+                .json()
+                .await
+                .map_err(|e| AuthError::InvalidResponse(e.to_string()))?;
             Ok(info)
         } else if resp.status().as_u16() == 401 {
             Err(AuthError::Unauthorized)
@@ -128,7 +146,10 @@ impl OAuthClient {
             .await?;
 
         if resp.status().is_success() {
-            let status: TokenStatus = resp.json().await.map_err(|e| AuthError::InvalidResponse(e.to_string()))?;
+            let status: TokenStatus = resp
+                .json()
+                .await
+                .map_err(|e| AuthError::InvalidResponse(e.to_string()))?;
             Ok(status)
         } else {
             Err(AuthError::ServerError(format!("HTTP {}", resp.status())))

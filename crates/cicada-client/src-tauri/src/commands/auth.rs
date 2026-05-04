@@ -1,4 +1,7 @@
-use cicada_core::auth::{generate_code_challenge, generate_code_verifier, oauth::OAuthClient, MemoryStorage, TokenStorage};
+use cicada_core::auth::{
+    generate_code_challenge, generate_code_verifier, oauth::OAuthClient, MemoryStorage,
+    TokenStorage,
+};
 use cicada_core::types::auth::UserInfo;
 use serde::Serialize;
 use tauri::State;
@@ -22,7 +25,9 @@ pub async fn start_login(state: State<'_, AuthState>) -> Result<LoginUrl, String
     let code_challenge = generate_code_challenge(&code_verifier);
     let state_str = uuid::Uuid::new_v4().to_string();
 
-    let url = state.client.build_authorize_url(&code_challenge, &state_str, None);
+    let url = state
+        .client
+        .build_authorize_url(&code_challenge, &state_str, None);
 
     Ok(LoginUrl {
         url,
@@ -74,10 +79,7 @@ pub async fn logout(state: State<'_, AuthState>) -> Result<(), String> {
     if let Ok(Some(tokens)) = state.storage.load_tokens() {
         let _ = state.client.logout(&tokens.access_token).await;
     }
-    state
-        .storage
-        .clear_tokens()
-        .map_err(|e| e.to_string())?;
+    state.storage.clear_tokens().map_err(|e| e.to_string())?;
 
     let mut guard = state.user_info.lock().unwrap();
     *guard = None;

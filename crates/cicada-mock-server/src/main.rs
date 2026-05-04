@@ -13,9 +13,7 @@ use tokio::sync::{broadcast, RwLock};
 use tower_http::cors::{Any, CorsLayer};
 use uuid::Uuid;
 
-use cicada_core::types::announcement::{
-    Announcement, AnnouncementCreate, AnnouncementType,
-};
+use cicada_core::types::announcement::{Announcement, AnnouncementCreate, AnnouncementType};
 
 type AnnouncementsDb = Arc<RwLock<Vec<Announcement>>>;
 type BroadcastTx = broadcast::Sender<Announcement>;
@@ -60,7 +58,9 @@ async fn seed_data(db: &AnnouncementsDb) {
     announcements.push(Announcement {
         id: Uuid::new_v4(),
         title: "关于期末考试安排的通知".to_string(),
-        content_html: "<p>各位同学：<br/>本学期期末考试将于<b>6月20日</b>开始，请提前做好准备。</p>".to_string(),
+        content_html:
+            "<p>各位同学：<br/>本学期期末考试将于<b>6月20日</b>开始，请提前做好准备。</p>"
+                .to_string(),
         announcement_type: AnnouncementType::Notice,
         publisher_name: "教务处".to_string(),
         publisher_user_id: "user_admin".to_string(),
@@ -100,7 +100,11 @@ async fn list_announcements(
 
     let total = filtered.len() as u64;
     let start = ((page - 1) * per_page) as usize;
-    let paged: Vec<Announcement> = filtered.into_iter().skip(start).take(per_page as usize).collect();
+    let paged: Vec<Announcement> = filtered
+        .into_iter()
+        .skip(start)
+        .take(per_page as usize)
+        .collect();
 
     Json(ListResponse {
         announcements: paged,
@@ -145,10 +149,7 @@ async fn create_announcement(
     Ok((StatusCode::CREATED, Json(announcement)))
 }
 
-async fn delete_announcement(
-    Path(id): Path<Uuid>,
-    State(state): State<AppState>,
-) -> StatusCode {
+async fn delete_announcement(Path(id): Path<Uuid>, State(state): State<AppState>) -> StatusCode {
     let mut announcements = state.db.write().await;
     if let Some(pos) = announcements.iter().position(|a| a.id == id) {
         announcements.remove(pos);
@@ -158,10 +159,7 @@ async fn delete_announcement(
     }
 }
 
-async fn ws_handler(
-    ws: WebSocketUpgrade,
-    State(state): State<AppState>,
-) -> impl IntoResponse {
+async fn ws_handler(ws: WebSocketUpgrade, State(state): State<AppState>) -> impl IntoResponse {
     ws.on_upgrade(move |socket| handle_ws(socket, state.db))
 }
 
@@ -221,8 +219,14 @@ async fn main() {
         .allow_headers(Any);
 
     let app = Router::new()
-        .route("/api/v1/announcements", get(list_announcements).post(create_announcement))
-        .route("/api/v1/announcements/{id}", get(get_announcement).delete(delete_announcement))
+        .route(
+            "/api/v1/announcements",
+            get(list_announcements).post(create_announcement),
+        )
+        .route(
+            "/api/v1/announcements/{id}",
+            get(get_announcement).delete(delete_announcement),
+        )
         .route("/ws/v1/announcements", get(ws_handler))
         .layer(cors)
         .with_state(state);
