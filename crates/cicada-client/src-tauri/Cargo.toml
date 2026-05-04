@@ -13,7 +13,7 @@ cicada-core = { path = "../../cicada-core" }
 cicada-api = { path = "../../cicada-api" }
 serde_json.workspace = true
 serde.workspace = true
-tauri = { version = "1", features = ["shell-open", "process-command-api", "updater"] }
+tauri = { version = "1", features = ["shell-open", "process-command-api", "updater", "system-tray"] }
 tokio.workspace = true
 uuid.workspace = true
 dirs = "5"
