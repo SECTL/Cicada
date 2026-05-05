@@ -1,5 +1,5 @@
 use cicada_core::config;
-use tauri::{Emitter, Manager};
+use tauri::Emitter;
 
 #[derive(serde::Serialize, Clone)]
 pub enum AppMode {

@@ -13,7 +13,6 @@ mod windows;
 fn main() {
     let config = config::load_config();
 
-    
     if config.behavior.auto_start && !autostart::is_autostart_enabled() {
         let _ = autostart::enable_autostart();
     }
@@ -50,7 +49,9 @@ fn main() {
             commands::build_info::get_build_info,
         ])
         .setup(move |app| {
-            let window = app.get_webview_window("main").expect("main window not found");
+            let window = app
+                .get_webview_window("main")
+                .expect("main window not found");
 
             let ds = &config.display;
             if ds.window_width > 0 && ds.window_height > 0 {

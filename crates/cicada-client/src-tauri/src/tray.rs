@@ -1,16 +1,16 @@
 use tauri::{
     menu::{Menu, MenuItem, PredefinedMenuItem},
     tray::TrayIconBuilder,
-    AppHandle, Manager,
+    AppHandle, Emitter, Manager,
 };
 
 pub fn build(app: &AppHandle) -> Result<(), Box<dyn std::error::Error>> {
-    let show = MenuItem::with_id(app, "show_main", "显示主窗口", true, None)?;
-    let hide = MenuItem::with_id(app, "hide_main", "隐藏到托盘", true, None)?;
-    let floating_show = MenuItem::with_id(app, "show_floating", "显示浮窗", true, None)?;
-    let floating_hide = MenuItem::with_id(app, "hide_floating", "隐藏浮窗", true, None)?;
-    let settings = MenuItem::with_id(app, "open_settings", "设置", true, None)?;
-    let quit = MenuItem::with_id(app, "quit", "退出", true, None)?;
+    let show = MenuItem::with_id(app, "show_main", "显示主窗口", true, None::<&str>)?;
+    let hide = MenuItem::with_id(app, "hide_main", "隐藏到托盘", true, None::<&str>)?;
+    let floating_show = MenuItem::with_id(app, "show_floating", "显示浮窗", true, None::<&str>)?;
+    let floating_hide = MenuItem::with_id(app, "hide_floating", "隐藏浮窗", true, None::<&str>)?;
+    let settings = MenuItem::with_id(app, "open_settings", "设置", true, None::<&str>)?;
+    let quit = MenuItem::with_id(app, "quit", "退出", true, None::<&str>)?;
 
     let menu = Menu::with_items(
         app,
