@@ -41,7 +41,9 @@ jobs:
         env:
           GIT_HASH: ${{ github.sha }}
           BUILD_DATE: ${{ github.event.repository.updated_at }}
+          TAURI_BUNDLE_TARGETS: nsis
         run: cargo tauri build
+
       - uses: actions/upload-artifact@v4
         with:
           name: cicada-windows
@@ -89,7 +91,8 @@ jobs:
         env:
           GIT_HASH: ${{ github.sha }}
           BUILD_DATE: ${{ github.event.repository.updated_at }}
-        run: cargo tauri build || cargo build --release -p cicada-mock-server
+          TAURI_BUNDLE_TARGETS: deb,appimage
+        run: cargo tauri build
 
       - uses: actions/upload-artifact@v4
         with:
@@ -128,7 +131,9 @@ jobs:
         env:
           GIT_HASH: ${{ github.sha }}
           BUILD_DATE: ${{ github.event.repository.updated_at }}
+          TAURI_BUNDLE_TARGETS: dmg
         run: cargo tauri build
+
       - uses: actions/upload-artifact@v4
         with:
           name: cicada-macos
