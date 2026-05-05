@@ -3,7 +3,7 @@
 
 #define MyAppName "知了"
 #define MyAppNameEn "Cicada"
-#define MyAppVersion GetFileVersion("build\cicada-client.exe")
+#define MyAppVersion "0.1.0"
 #define MyAppPublisher "SECTL"
 #define MyAppURL "https://github.com/SECTL/Cicada"
 #define MyAppExeName "cicada-client.exe"
