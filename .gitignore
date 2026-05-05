@@ -35,8 +35,8 @@ Thumbs.db
 *.AppImage
 *.dmg
 
-# Tauri
-src-tauri/target/
+# Tauri generated
+crates/cicada-client/src-tauri/gen/
 
 # Misc
 .sisyphus/evidence/
