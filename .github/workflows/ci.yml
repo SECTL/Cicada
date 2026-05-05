@@ -86,13 +86,12 @@ jobs:
       - name: Install Tauri CLI
         run: cargo install tauri-cli --version "1.6.6" --locked
 
-      - name: Build Tauri
+      - name: Build Tauri (Linux)
         working-directory: crates/cicada-client
         env:
           GIT_HASH: ${{ github.sha }}
           BUILD_DATE: ${{ github.event.repository.updated_at }}
-          TAURI_BUNDLE_TARGETS: deb,appimage
-        run: cargo tauri build
+        run: cargo tauri build --bundles deb,appimage || cargo build --release
 
       - uses: actions/upload-artifact@v4
         with:
@@ -100,6 +99,7 @@ jobs:
           path: |
             crates/cicada-client/src-tauri/target/release/bundle/deb/*.deb
             crates/cicada-client/src-tauri/target/release/bundle/appimage/*.AppImage
+            target/release/cicada-client
             target/release/cicada-mock-server
 
   macos:
