@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { listen } from "@tauri-apps/api/event";
+import { invoke } from "../utils/tauri";
 
 interface Announcement {
   id: string;
@@ -10,31 +11,69 @@ interface Announcement {
   created_at: string;
 }
 
+interface DisplayConfig {
+  font_size: number;
+  font_color: string;
+  font_family: string;
+  bg_color: string;
+  bg_opacity: number;
+}
+
 const FloatingWindow: React.FC = () => {
   const [announcement, setAnnouncement] = useState<Announcement | null>(null);
   const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
   const [queue, setQueue] = useState<Announcement[]>([]);
   const [queueIndex, setQueueIndex] = useState(0);
+  const [display, setDisplay] = useState<DisplayConfig>({
+    font_size: 24,
+    font_color: "#ffffff",
+    font_family: "sans-serif",
+    bg_color: "#000000",
+    bg_opacity: 0.8,
+  });
+
+  const loadDisplayConfig = useCallback(async () => {
+    try {
+      const cfg = await invoke<{ display: DisplayConfig }>("get_config");
+      if (cfg?.display) {
+        setDisplay(cfg.display);
+      }
+    } catch {
+      // use defaults
+    }
+  }, []);
 
   useEffect(() => {
-    const unlisten = listen<{ announcement: Announcement }>("announcement", (event) => {
-      const ann = event.payload.announcement;
-      if (ann.announcement_type === "emergency") {
-        setAnnouncement(ann);
-        setQueue((prev) => [ann, ...prev]);
-      } else {
-        setQueue((prev) => {
-          const updated = [...prev, ann];
-          if (!announcement) {
-            setAnnouncement(ann);
-          }
-          return updated;
-        });
-      }
+    loadDisplayConfig();
+  }, [loadDisplayConfig]);
+
+  useEffect(() => {
+    const unlistenConfig = listen("config-updated", () => {
+      loadDisplayConfig();
     });
 
+    const unlistenAnnouncement = listen<{ announcement: Announcement }>(
+      "announcement",
+      (event) => {
+        const ann = event.payload.announcement;
+        if (ann.announcement_type === "emergency") {
+          setAnnouncement(ann);
+          setQueue((prev) => [ann, ...prev]);
+        } else {
+          setQueue((prev) => {
+            const updated = [...prev, ann];
+            if (!announcement) {
+              setAnnouncement(ann);
+            }
+            return updated;
+          });
+        }
+      }
+    );
+
     return () => {
-      unlisten.then((fn) => fn());
+      unlistenConfig.then((fn) => fn());
+      unlistenAnnouncement.then((fn) => fn());
     };
   }, []);
 
@@ -61,10 +100,19 @@ const FloatingWindow: React.FC = () => {
     }
   };
 
+  const inlineStyle: React.CSSProperties = {
+    fontFamily: display.font_family,
+    color: display.font_color,
+    backgroundColor: display.bg_color,
+    opacity: display.bg_opacity,
+  };
+
   if (!announcement) {
     return (
-      <div className="floating-window empty" data-tauri-drag-region>
-        <p className="empty-text">暂无公告</p>
+      <div className="floating-window empty" style={inlineStyle} data-tauri-drag-region>
+        <p className="empty-text" style={{ fontSize: `${display.font_size}px` }}>
+          暂无公告
+        </p>
       </div>
     );
   }
@@ -74,17 +122,21 @@ const FloatingWindow: React.FC = () => {
   return (
     <div
       className={`floating-window ${typeClass}`}
+      style={inlineStyle}
       onContextMenu={handleContextMenu}
       onClick={closeContextMenu}
     >
       <div className="announcement-header" data-tauri-drag-region>
         {announcement.announcement_type === "emergency" && (
-          <span className="emergency-badge">⚠️ 紧急通知</span>
+          <span className="emergency-badge">紧急通知</span>
         )}
-        <h2 className="announcement-title">{announcement.title}</h2>
+        <h2 className="announcement-title" style={{ fontSize: `${display.font_size}px` }}>
+          {announcement.title}
+        </h2>
       </div>
       <div
         className="announcement-body"
+        style={{ fontSize: `${Math.max(12, display.font_size - 4)}px` }}
         dangerouslySetInnerHTML={{ __html: announcement.content_html }}
       />
       <div className="announcement-footer">
@@ -97,11 +149,13 @@ const FloatingWindow: React.FC = () => {
       {queue.length > 1 && (
         <div className="queue-nav">
           <button onClick={prevAnnouncement} disabled={queueIndex === 0}>
-            ← 上一条
+            上一条
           </button>
-          <span>{queueIndex + 1} / {queue.length}</span>
+          <span>
+            {queueIndex + 1} / {queue.length}
+          </span>
           <button onClick={nextAnnouncement} disabled={queueIndex >= queue.length - 1}>
-            下一条 →
+            下一条
           </button>
         </div>
       )}

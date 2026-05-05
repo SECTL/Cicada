@@ -415,6 +415,23 @@ const Settings: React.FC = () => {
                     ]}
                     sx={{ mb: 3 }}
                   />
+
+                  <Typography variant="body2" sx={{ mb: 1.5, fontWeight: 500 }}>
+                    字体
+                  </Typography>
+                  <TextField
+                    select
+                    value={currentConfig.display.font_family}
+                    onChange={(e) => set("display", "font_family", e.target.value)}
+                    sx={{ width: 280 }}
+                  >
+                    <MenuItem value="sans-serif">sans-serif</MenuItem>
+                    <MenuItem value="PingFang SC, sans-serif">PingFang SC</MenuItem>
+                    <MenuItem value="Microsoft YaHei, sans-serif">Microsoft YaHei</MenuItem>
+                    <MenuItem value="Noto Sans SC, sans-serif">Noto Sans SC</MenuItem>
+                    <MenuItem value="serif">serif</MenuItem>
+                    <MenuItem value="monospace">monospace</MenuItem>
+                  </TextField>
                 </Paper>
 
                 <Paper

@@ -1,6 +1,6 @@
 use cicada_core::auth::oauth::OAuthClient;
 use cicada_core::auth::MemoryStorage;
-use cicada_core::config::{self, AppConfig};
+use cicada_core::config::{self};
 use commands::auth::AuthState;
 use tauri::{Emitter, Manager};
 
