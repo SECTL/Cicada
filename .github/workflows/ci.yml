@@ -41,21 +41,10 @@ jobs:
           GIT_HASH: ${{ github.sha }}
           BUILD_DATE: ${{ github.event.repository.updated_at }}
         run: cargo tauri build
-      - name: Install Inno Setup
-        run: choco install innosetup --no-progress -y
-      - name: Build Inno Setup installer
-        shell: cmd
-        run: |
-          set PATH=%PATH%;C:\Program Files (x86)\Inno Setup 6
-          cd crates\cicada-client\src-tauri\installer
-          mkdir build 2>nul
-          copy /Y ..\target\release\cicada-client.exe build\
-          if exist ..\target\release\*.dll copy /Y ..\target\release\*.dll build\
-          ISCC cicada.iss
       - uses: actions/upload-artifact@v4
         with:
           name: cicada-windows
-          path: crates/cicada-client/src-tauri/installer/Output/*.exe
+          path: crates/cicada-client/src-tauri/target/release/bundle/nsis/*.exe
 
   linux:
     name: Linux
@@ -114,36 +103,3 @@ jobs:
         with:
           name: cicada-macos
           path: crates/cicada-client/src-tauri/target/release/bundle/dmg/*.dmg
-
-  android:
-    name: Android
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-      - name: Build mobile PWA
-        working-directory: mobile
-        run: npm install && npm run build
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: 17
-      - name: Setup Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: platforms;android-34 build-tools;34.0.0
-      - name: Build Android APK
-        working-directory: mobile
-        run: |
-          npm install @capacitor/core @capacitor/cli @capacitor/android
-          npx cap init "知了" "com.cicada.app" --web-dir=dist
-          npx cap add android
-          npx cap sync android
-          cd android
-          ./gradlew assembleDebug
-      - uses: actions/upload-artifact@v4
-        with:
-          name: cicada-android
-          path: mobile/android/app/build/outputs/apk/debug/*.apk
