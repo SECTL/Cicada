@@ -4,12 +4,16 @@ use tauri::Manager;
 
 mod autostart;
 mod commands;
+mod commands;
 mod tray;
 mod updater;
 mod windows;
 
 use cicada_core::auth::oauth::OAuthClient;
+use cicada_core::auth::MemoryStorage;
+use cicada_core::config;
 use commands::auth::AuthState;
+use tauri::Manager;
 
 fn main() {
     let config = config::load_config();
