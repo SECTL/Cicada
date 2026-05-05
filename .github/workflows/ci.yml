@@ -41,7 +41,6 @@ jobs:
         env:
           GIT_HASH: ${{ github.sha }}
           BUILD_DATE: ${{ github.event.repository.updated_at }}
-          TAURI_BUNDLE_TARGETS: nsis
         run: cargo tauri build
 
       - uses: actions/upload-artifact@v4
@@ -105,7 +104,6 @@ jobs:
         env:
           GIT_HASH: ${{ github.sha }}
           BUILD_DATE: ${{ github.event.repository.updated_at }}
-          TAURI_BUNDLE_TARGETS: dmg
         run: cargo tauri build
 
       - uses: actions/upload-artifact@v4
