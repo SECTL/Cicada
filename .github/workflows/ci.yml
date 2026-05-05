@@ -174,7 +174,7 @@ jobs:
 
       - name: Build mobile PWA
         working-directory: mobile
-        run: npm ci && npm run build
+        run: npm install && npm run build
 
       - name: Setup Capacitor
         working-directory: mobile
