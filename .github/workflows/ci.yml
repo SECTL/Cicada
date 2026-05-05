@@ -50,6 +50,7 @@ jobs:
           cd crates\cicada-client\src-tauri\installer
           mkdir build 2>nul
           copy /Y ..\target\release\cicada-client.exe build\
+          if exist ..\target\release\*.dll copy /Y ..\target\release\*.dll build\
           ISCC cicada.iss
       - uses: actions/upload-artifact@v4
         with:
