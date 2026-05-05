@@ -4,17 +4,24 @@ use std::path::PathBuf;
 use super::settings::AppConfig;
 
 fn config_path() -> PathBuf {
-    let base = if cfg!(target_os = "windows") {
-        dirs::data_dir().unwrap_or_else(|| PathBuf::from("."))
+    let dir = if cfg!(target_os = "windows") {
+        // Windows: config.toml 放在 exe 同目录下的 Cicada 文件夹
+        std::env::current_exe()
+            .ok()
+            .and_then(|p| p.parent().map(|p| p.join("Cicada")))
+            .unwrap_or_else(|| PathBuf::from("Cicada"))
     } else if cfg!(target_os = "macos") {
         dirs::home_dir()
             .unwrap_or_else(|| PathBuf::from("."))
             .join("Library")
             .join("Application Support")
+            .join("Cicada")
     } else {
-        dirs::config_dir().unwrap_or_else(|| dirs::home_dir().unwrap_or_else(|| PathBuf::from(".")))
+        // Linux: ~/.config/cicada
+        dirs::config_dir()
+            .unwrap_or_else(|| dirs::home_dir().unwrap_or_else(|| PathBuf::from(".")))
+            .join("cicada")
     };
-    let dir = base.join("Cicada");
     fs::create_dir_all(&dir).ok();
     dir.join("config.toml")
 }

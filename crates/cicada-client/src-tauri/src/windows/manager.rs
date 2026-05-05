@@ -1,4 +1,4 @@
-use tauri::{Manager, WindowBuilder};
+use tauri::{Manager, WebviewUrl, WebviewWindowBuilder};
 
 pub struct WindowManager {
     floating_windows: Vec<String>,
@@ -21,8 +21,8 @@ impl WindowManager {
         height: f64,
         topmost: bool,
     ) -> Result<(), tauri::Error> {
-        let url = tauri::WindowUrl::App("floating".into());
-        WindowBuilder::new(app, label, url)
+        let url = WebviewUrl::App("floating".into());
+        WebviewWindowBuilder::new(app, label, url)
             .position(x, y)
             .inner_size(width, height)
             .decorations(false)
@@ -37,7 +37,7 @@ impl WindowManager {
     }
 
     pub fn destroy_floating_window(&mut self, app: &tauri::AppHandle, label: &str) {
-        if let Some(window) = app.get_window(label) {
+        if let Some(window) = app.get_webview_window(label) {
             let _ = window.close();
         }
         self.floating_windows.retain(|l| l != label);
@@ -45,7 +45,7 @@ impl WindowManager {
 
     pub fn show_all(&self, app: &tauri::AppHandle) {
         for label in &self.floating_windows {
-            if let Some(window) = app.get_window(label) {
+            if let Some(window) = app.get_webview_window(label) {
                 let _ = window.show();
             }
         }
@@ -53,14 +53,14 @@ impl WindowManager {
 
     pub fn hide_all(&self, app: &tauri::AppHandle) {
         for label in &self.floating_windows {
-            if let Some(window) = app.get_window(label) {
+            if let Some(window) = app.get_webview_window(label) {
                 let _ = window.hide();
             }
         }
     }
 
     pub fn set_topmost(&self, app: &tauri::AppHandle, label: &str, topmost: bool) {
-        if let Some(window) = app.get_window(label) {
+        if let Some(window) = app.get_webview_window(label) {
             let _ = window.set_always_on_top(topmost);
         }
     }

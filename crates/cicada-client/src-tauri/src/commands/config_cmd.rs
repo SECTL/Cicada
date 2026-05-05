@@ -1,5 +1,6 @@
 use crate::autostart;
 use cicada_core::config::{load_config, save_config, AppConfig};
+use tauri::{Emitter, Manager};
 
 #[tauri::command]
 pub fn get_config() -> AppConfig {
@@ -7,8 +8,20 @@ pub fn get_config() -> AppConfig {
 }
 
 #[tauri::command]
-pub fn update_config(config: AppConfig) -> AppConfig {
+pub fn update_config(config: AppConfig, app: tauri::AppHandle) -> AppConfig {
     save_config(&config);
+
+    if config.behavior.auto_start {
+        let _ = autostart::enable_autostart();
+    } else {
+        let _ = autostart::disable_autostart();
+    }
+
+    if let Some(window) = app.get_webview_window("main") {
+        let _ = window.set_always_on_top(config.behavior.floating_topmost);
+    }
+
+    let _ = app.emit("config-updated", &config);
     config
 }
 

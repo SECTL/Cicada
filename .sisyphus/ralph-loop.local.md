@@ -4,10 +4,10 @@ iteration: 1
 max_iterations: 500
 completion_promise: "DONE"
 initial_completion_promise: "DONE"
-started_at: "2026-05-05T01:39:14.992Z"
-session_id: "ses_20c69218fffe18w8GnoPBzDFKn"
+started_at: "2026-05-05T01:51:27.442Z"
+session_id: "ses_20a38dbc3ffeYKIdhRRZ7MD204"
 ultrawork: true
 strategy: "continue"
-message_count_at_start: 472
+message_count_at_start: 43
 ---
-git邮箱是:lzy.12@foxmail.com
+你升级到v2吧,你慢慢迁移

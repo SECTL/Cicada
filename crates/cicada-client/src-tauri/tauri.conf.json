@@ -1,35 +1,14 @@
 {
+  "productName": "知了",
+  "version": "0.1.0",
+  "identifier": "com.cicada.app",
   "build": {
-    "beforeDevCommand": "cd ui && npm run dev",
-    "beforeBuildCommand": "cd ui && npm run build",
-    "devPath": "http://localhost:5173",
-    "distDir": "../ui/dist"
+    "frontendDist": "../ui/dist",
+    "devUrl": "http://localhost:5173",
+    "beforeDevCommand": "cd ../ui && npm run dev",
+    "beforeBuildCommand": "cd ../ui && npm run build"
   },
-  "package": {
-    "productName": "知了",
-    "version": "0.1.0"
-  },
-  "tauri": {
-    "allowlist": {
-      "all": false,
-      "shell": { "open": true },
-      "process": { "relaunch": true }
-    },
-    "bundle": {
-      "active": true,
-      "targets": ["nsis"],
-      "identifier": "com.cicada.app",
-      "icon": [
-        "icons/32x32.png",
-        "icons/128x128.png",
-        "icons/128x128@2x.png",
-        "icons/icon.icns",
-        "icons/icon.ico"
-      ]
-    },
-    "security": {
-      "csp": null
-    },
+  "app": {
     "windows": [
       {
         "title": "知了",
@@ -39,6 +18,20 @@
         "decorations": true,
         "visible": false
       }
+    ],
+    "security": {
+      "csp": null
+    }
+  },
+  "bundle": {
+    "active": true,
+    "targets": ["nsis", "deb", "appimage", "dmg"],
+    "icon": [
+      "icons/32x32.png",
+      "icons/128x128.png",
+      "icons/128x128@2x.png",
+      "icons/icon.icns",
+      "icons/icon.ico"
     ]
   }
 }

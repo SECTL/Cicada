@@ -6,18 +6,16 @@ license.workspace = true
 authors.workspace = true
 
 [build-dependencies]
-tauri-build = { version = "1", features = [] }
+tauri-build = { version = "2", features = [] }
 
 [dependencies]
 cicada-core = { path = "../../cicada-core" }
 cicada-api = { path = "../../cicada-api" }
 serde_json.workspace = true
 serde.workspace = true
-tauri = { version = "1", features = ["shell-open", "process-command-api", "updater", "system-tray"] }
+tauri = { version = "2", features = ["tray-icon"] }
+tauri-plugin-shell = "2"
+tauri-plugin-process = "2"
 tokio.workspace = true
 uuid.workspace = true
 dirs = "5"
-
-[features]
-default = ["custom-protocol"]
-custom-protocol = ["tauri/custom-protocol"]
