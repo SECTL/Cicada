@@ -57,7 +57,7 @@ jobs:
       - name: Rename artifacts
         shell: pwsh
         run: |
-          $src = "crates/cicada-client/src-tauri/target/${{ matrix.arch }}-pc-windows-msvc/release/bundle"
+          $src = "target/${{ matrix.arch }}-pc-windows-msvc/release/bundle"
           Get-ChildItem "$src/msi" -Filter *.msi | Rename-Item -NewName "Cicada_$env:VERSION_windows_${{ matrix.arch }}.msi"
           $exe = Get-ChildItem "$src/nsis" -Filter *.exe | Select-Object -First 1
           if ($exe) { Rename-Item $exe.FullName -NewName "Cicada_$env:VERSION_windows_${{ matrix.arch }}.exe" }
@@ -65,7 +65,7 @@ jobs:
       - name: Make zip (portable)
         shell: pwsh
         run: |
-          $release = "crates/cicada-client/src-tauri/target/${{ matrix.arch }}-pc-windows-msvc/release"
+          $release = "target/${{ matrix.arch }}-pc-windows-msvc/release"
           $exe = Get-ChildItem $release -Filter *.exe | Select-Object -First 1
           if (-not $exe) {
             throw "No portable executable found in $release"
@@ -79,8 +79,8 @@ jobs:
         with:
           name: windows-${{ matrix.arch }}
           path: |
-            crates/cicada-client/src-tauri/target/${{ matrix.arch }}-pc-windows-msvc/release/bundle/msi/*.msi
-            crates/cicada-client/src-tauri/target/${{ matrix.arch }}-pc-windows-msvc/release/bundle/nsis/*.exe
+            target/${{ matrix.arch }}-pc-windows-msvc/release/bundle/msi/*.msi
+            target/${{ matrix.arch }}-pc-windows-msvc/release/bundle/nsis/*.exe
             Cicada_*_windows_${{ matrix.arch }}_portable.zip
 
   android:
@@ -101,7 +101,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
 
       - uses: android-actions/setup-android@v3
 
@@ -176,7 +176,7 @@ jobs:
 
       - name: Rename artifacts
         run: |
-          BUNDLE="crates/cicada-client/src-tauri/target/release/bundle"
+          BUNDLE="target/release/bundle"
           if [ -f "$BUNDLE/deb/"*.deb ]; then
             mv "$BUNDLE/deb/"*.deb "Cicada_${VERSION}_linux_amd64.deb"
           fi
@@ -233,7 +233,7 @@ jobs:
 
       - name: Rename artifacts
         run: |
-          BUNDLE="crates/cicada-client/src-tauri/target/universal-apple-darwin/release/bundle"
+          BUNDLE="target/universal-apple-darwin/release/bundle"
           if ls "$BUNDLE/dmg/"*.dmg 1>/dev/null 2>&1; then
             mv "$BUNDLE/dmg/"*.dmg "Cicada_${VERSION}_macos_universal.dmg"
           fi

@@ -46,7 +46,7 @@ jobs:
       - name: Make zip (portable)
         shell: pwsh
         run: |
-          $release = "crates/cicada-client/src-tauri/target/release"
+          $release = "target/release"
           $exe = Get-ChildItem $release -Filter *.exe | Select-Object -First 1
           if (-not $exe) {
             throw "No portable executable found in $release"
@@ -59,7 +59,7 @@ jobs:
         with:
           name: cicada-windows
           path: |
-            crates/cicada-client/src-tauri/target/release/bundle/nsis/*.exe
+            target/release/bundle/nsis/*.exe
             Cicada_windows_portable.zip
 
   linux:
@@ -104,7 +104,7 @@ jobs:
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
-          java-version: 17
+          java-version: 21
 
       - uses: android-actions/setup-android@v3
 
