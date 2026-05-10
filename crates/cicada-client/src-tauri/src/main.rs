@@ -1,3 +1,5 @@
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 use cicada_core::auth::oauth::OAuthClient;
 use cicada_core::auth::MemoryStorage;
 use cicada_core::config;
@@ -43,7 +45,9 @@ fn main() {
             commands::build_info::get_build_info,
         ])
         .setup(|app| {
-            let _window = app.get_window("main").expect("main window not found");
+            let window = app.get_window("main").expect("main window not found");
+            window.show()?;
+            window.set_focus()?;
             Ok(())
         })
         .run(tauri::generate_context!())

@@ -37,7 +37,7 @@
         "height": 680,
         "resizable": true,
         "decorations": true,
-        "visible": false
+        "visible": true
       }
     ]
   }
