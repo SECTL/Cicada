@@ -114,7 +114,7 @@ jobs:
           mkdir mobile-android
           cd mobile-android
           npm init -y
-          npm install @capacitor/core @capacitor/cli @capacitor/android
+          npm install @capacitor/core@6 @capacitor/cli@6 @capacitor/android@6
           cat > capacitor.config.json <<'EOF'
           {
             "appId": "com.cicada.app",
