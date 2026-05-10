@@ -28,6 +28,7 @@ fn main() {
     tauri::Builder::default()
         .manage(auth_state)
         .invoke_handler(tauri::generate_handler![
+            commands::announcement::publish_announcement,
             commands::auth::start_login,
             commands::auth::complete_login,
             commands::auth::get_user_info,

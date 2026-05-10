@@ -65,11 +65,15 @@ jobs:
       - name: Make zip (portable)
         shell: pwsh
         run: |
-          $bundle = "crates/cicada-client/src-tauri/target/${{ matrix.arch }}-pc-windows-msvc/release/bundle"
-          $exe = Get-ChildItem "$bundle/nsis" -Filter *.exe | Select-Object -First 1
-          if ($exe) {
-            Compress-Archive -Path $exe.FullName -DestinationPath "Cicada_$env:VERSION_windows_${{ matrix.arch }}_portable.zip"
+          $release = "crates/cicada-client/src-tauri/target/${{ matrix.arch }}-pc-windows-msvc/release"
+          $exe = Get-ChildItem $release -Filter *.exe | Select-Object -First 1
+          if (-not $exe) {
+            throw "No portable executable found in $release"
           }
+          $portable = "portable-windows-${{ matrix.arch }}"
+          New-Item -ItemType Directory -Force -Path $portable | Out-Null
+          Copy-Item $exe.FullName "$portable/Cicada.exe"
+          Compress-Archive -Path "$portable/*" -DestinationPath "Cicada_$env:VERSION_windows_${{ matrix.arch }}_portable.zip" -Force
 
       - uses: actions/upload-artifact@v4
         with:
@@ -78,6 +82,61 @@ jobs:
             crates/cicada-client/src-tauri/target/${{ matrix.arch }}-pc-windows-msvc/release/bundle/msi/*.msi
             crates/cicada-client/src-tauri/target/${{ matrix.arch }}-pc-windows-msvc/release/bundle/nsis/*.exe
             Cicada_*_windows_${{ matrix.arch }}_portable.zip
+
+  android:
+    name: Android
+    runs-on: ubuntu-latest
+    needs: version
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: mobile/package-lock.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 17
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Build mobile PWA
+        working-directory: mobile
+        run: npm ci && npm run build
+
+      - name: Build Android APK
+        run: |
+          mkdir mobile-android
+          cd mobile-android
+          npm init -y
+          npm install @capacitor/core @capacitor/cli @capacitor/android
+          cat > capacitor.config.json <<'EOF'
+          {
+            "appId": "com.cicada.app",
+            "appName": "知了",
+            "webDir": "../mobile/dist"
+          }
+          EOF
+          npx cap add android
+          npx cap copy android
+          cd android
+          ./gradlew assembleDebug
+
+      - name: Rename APK
+        run: |
+          mkdir -p android-artifacts
+          cp mobile-android/android/app/build/outputs/apk/debug/*.apk \
+            "android-artifacts/Cicada_${VERSION}_android_debug.apk"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: android
+          path: android-artifacts/*.apk
 
   linux:
     name: Linux
@@ -187,7 +246,7 @@ jobs:
   github-release:
     name: Create Release
     runs-on: ubuntu-latest
-    needs: [version, windows, linux, macos]
+    needs: [version, windows, linux, macos, android]
     steps:
       - uses: actions/checkout@v4
         with:
@@ -216,5 +275,6 @@ jobs:
             windows-i686/Cicada_*_windows_i686_portable.zip
             linux-amd64/Cicada_*_linux_*
             macos-universal/Cicada_*_macos_*
+            android/Cicada_*_android_*.apk
           draft: false
           prerelease: false

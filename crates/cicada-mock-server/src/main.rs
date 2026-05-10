@@ -224,7 +224,7 @@ async fn main() {
             get(list_announcements).post(create_announcement),
         )
         .route(
-            "/api/v1/announcements/{id}",
+            "/api/v1/announcements/:id",
             get(get_announcement).delete(delete_announcement),
         )
         .route("/ws/v1/announcements", get(ws_handler))

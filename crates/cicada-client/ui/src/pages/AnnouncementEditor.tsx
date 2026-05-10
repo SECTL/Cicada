@@ -10,6 +10,12 @@ import {
   FormatUnderlined, Title, Warning, Info, Campaign
 } from "@mui/icons-material";
 
+interface Announcement {
+  id: string;
+  title: string;
+  created_at: string;
+}
+
 const TYPES = [
   { value: "normal", label: "普通公告", color: "primary", icon: <Campaign fontSize="small" /> },
   { value: "emergency", label: "紧急通知", color: "error", icon: <Warning fontSize="small" /> },
@@ -42,13 +48,13 @@ const AnnouncementEditor: React.FC = () => {
     }
     setIsPublishing(true);
     try {
-      await invoke("publish_announcement", {
+      const announcement = await invoke<Announcement>("publish_announcement", {
         title: title.trim(),
         contentHtml,
         announcementType: annType,
         publisherName: publisher.trim() || "匿名",
       });
-      setMsg({ type: "success", text: "公告发布成功！" });
+      setMsg({ type: "success", text: `公告发布成功：${announcement.title}` });
       setTitle("");
       setContentHtml("");
       setAnnType("normal");
